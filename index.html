@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="slides-format" content="viewport" />
+  <title>Quest Campaign Proposal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-bg: #E0F7F7;
+      --color-bg-deep: #CFF0F0;
+      --color-surface: #F7FFFF;
+      --color-text: #10233F;
+      --color-text-secondary: #355070;
+      --color-text-muted: #5E7C99;
+      --color-accent-1: #2D5BFF;
+      --color-accent-2: #00D4C4;
+      --color-accent-3: #78E7E1;
+      --color-glass-bg: rgba(255,255,255,0.78);
+      --color-glass-border: rgba(16,35,63,0.08);
+      --color-vignette: rgba(16,35,63,0.06);
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+  </style>
+  <style>
+    :root { --color-bg: #E0F7F7; --color-text: #10233F; --glow-color-rgb: 45,91,255; --font-body: 'Inter', sans-serif; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { background: var(--color-bg); margin: 0; }
+    body { font-family: var(--font-body); color: var(--color-text); overflow: hidden; height: 100vh; width: 100vw; }
+    .deck { width: 100vw; height: 100vh; position: relative; }
+    .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--color-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transform: scale(0.97); transition: opacity 0.7s ease, transform 0.7s ease; pointer-events: none; overflow: hidden; }
+    .slide.active { opacity: 1; transform: scale(1); pointer-events: all; }
+    .slide > .content { position: relative; z-index: 2; width: 100%; max-width: 1220px; padding: clamp(1.2rem, 3vw, 2.3rem) clamp(1.4rem, 3.4vw, 3rem) 5.4rem; }
+    .nav-controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; z-index: 100; background: rgba(255,255,255,0.82); backdrop-filter: blur(12px); padding: 10px 18px; border-radius: 40px; border: 1px solid rgba(16,35,63,0.08); box-shadow: 0 10px 30px rgba(45,91,255,0.08); }
+    .nav-btn { width: 38px; height: 38px; border: none; background: rgba(45,91,255,0.08); color: #2D5BFF; border-radius: 50%; font-size: 1.15rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .slide-dots { display: flex; gap: 8px; }
+    .slide-dots .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(16,35,63,0.16); cursor: pointer; transition: all .25s ease; }
+    .slide-dots .dot.active { background: #2D5BFF; transform: scale(1.3); }
+    .slide-counter { font-size: .8rem; color: #5E7C99; min-width: 46px; text-align: center; }
+    .reveal { opacity: 0; transform: translateY(20px); }
+    .gradient-mesh { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(90px); animation: float-slow 16s ease-in-out infinite; }
+    .blob:nth-child(2) { animation: float-drift 19s ease-in-out infinite; }
+    .blob:nth-child(3) { animation: float-slow 22s ease-in-out infinite reverse; }
+    @keyframes float-slow { 0% { transform: translate(0,0) scale(1);} 25% { transform: translate(40px,-30px) scale(1.08);} 50% { transform: translate(-20px,25px) scale(.94);} 75% { transform: translate(35px,15px) scale(1.04);} 100% { transform: translate(0,0) scale(1);} }
+    @keyframes float-drift { 0% { transform: translate(0,0) scale(1) rotate(0deg);} 33% { transform: translate(-45px,-40px) scale(1.12) rotate(4deg);} 66% { transform: translate(28px,24px) scale(.92) rotate(-3deg);} 100% { transform: translate(0,0) scale(1) rotate(0deg);} }
+    @keyframes float { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-12px);} }
+    @keyframes float-gentle { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-4px);} }
+    .slide::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background-image: radial-gradient(rgba(255,255,255,0.5) 1px, transparent 1px); background-size: 18px 18px; opacity: .15; }
+    .slide::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, var(--color-vignette) 100%); }
+    .pill { display:inline-flex; align-items:center; gap:.45rem; padding:.45rem .85rem; border-radius:999px; background:rgba(45,91,255,.1); color:#2D5BFF; font-size:.85rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+    .glass-card { background: rgba(255,255,255,0.84); border: 1px solid rgba(16,35,63,0.08); border-radius: 24px; box-shadow: 0 18px 50px rgba(26,66,126,0.08); }
+    .title-xl { font-family:'Space Grotesk',sans-serif; font-weight:700; line-height:1.02; letter-spacing:-.04em; }
+    .section-title { font-family:'Space Grotesk',sans-serif; font-weight:700; letter-spacing:-.03em; color:#10233F; }
+    .small-note { font-size:.76rem; line-height:1.35; color:#5E7C99; }
+    .kpi-card, .problem-card, .menu-card, .resp-card, .principle-card, .question-card, .sample-card { padding: 1rem 1rem 1rem; border-radius: 20px; background: rgba(255,255,255,0.88); border: 1px solid rgba(16,35,63,0.08); box-shadow: 0 12px 28px rgba(45,91,255,0.06); }
+    .mini-label { font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; font-weight:700; color:#2D5BFF; }
+    .speaker { position:absolute; left:20px; bottom:20px; max-width:420px; font-size:11px; line-height:1.35; color:rgba(16,35,63,.0); user-select:none; }
+    .timeline-line { position:absolute; left:5%; right:5%; top:50%; height:4px; background: linear-gradient(90deg, rgba(45,91,255,.16), rgba(0,212,196,.5), rgba(45,91,255,.16)); border-radius:999px; }
+    .timeline-node { position:relative; z-index:2; }
+    .timeline-node::before { content:''; display:block; width:16px; height:16px; border-radius:50%; background:#2D5BFF; box-shadow:0 0 0 8px rgba(45,91,255,.12); margin:0 auto 12px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { padding: .7rem .8rem; text-align: left; font-size: .92rem; }
+    th { font-weight: 800; }
+    tr:not(:last-child) td, tr:not(:last-child) th { border-bottom: 1px solid rgba(16,35,63,0.08); }
+    .pack-box { border:2px dashed rgba(45,91,255,.24); background:rgba(255,255,255,.75); border-radius:22px; }
+    .accent-line { height:4px; border-radius:999px; background: linear-gradient(90deg, #2D5BFF, #00D4C4); }
+    .footer-tag { font-size:.8rem; color:#5E7C99; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .2s !important; } }
+
+    /* Slide logo (slides 2–11) */
+    .slide-logo { position: absolute; top: 1.1rem; right: clamp(1.4rem, 3.4vw, 3rem); z-index: 10; }
+    .slide-logo img { height: 26px; object-fit: contain; opacity: 0.82; }
+
+    /* Chat bubble cards (slide 2) — two-layer tail for clear chat shape */
+    .chat-bubble {
+      position: relative;
+      background: rgba(255,255,255,0.96);
+      border: 1.5px solid rgba(45,91,255,0.16);
+      border-radius: 18px 18px 18px 4px;
+      box-shadow: 0 24px 60px rgba(45,91,255,0.16), 0 6px 20px rgba(0,0,0,0.08);
+      padding: 1.2rem 1.2rem 1.1rem;
+    }
+    /* border layer of tail */
+    .chat-bubble::before {
+      content: '';
+      position: absolute;
+      bottom: -14px;
+      left: 16px;
+      width: 0; height: 0;
+      border-left: 13px solid transparent;
+      border-right: 0 solid transparent;
+      border-top: 14px solid rgba(45,91,255,0.18);
+      border-bottom: 0;
+    }
+    /* fill layer of tail */
+    .chat-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -11px;
+      left: 18px;
+      width: 0; height: 0;
+      border-left: 11px solid transparent;
+      border-right: 0 solid transparent;
+      border-top: 11px solid rgba(255,255,255,0.96);
+      border-bottom: 0;
+    }
+    .chat-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, #2D5BFF 0%, #00D4C4 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .65rem; font-weight: 800; color: #fff;
+      flex-shrink: 0;
+      margin-bottom: .65rem;
+    }
+
+    /* Infra feature blocks (slide 3) */
+    .infra-block {
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 14px;
+      padding: .7rem .9rem;
+      text-align: center;
+      font-size: .86rem;
+      color: rgba(255,255,255,0.92);
+      line-height: 1.4;
+    }
+    .usp-box {
+      background: linear-gradient(135deg, #2D5BFF 0%, #1a3fd4 100%);
+      border-radius: 20px;
+      padding: 1.1rem 1.4rem 1.3rem;
+      box-shadow: 0 20px 50px rgba(45,91,255,0.3);
+    }
+    .usp-heading {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+      text-align: center;
+      margin-bottom: .85rem;
+      letter-spacing: -.02em;
+    }
+
+    /* Mobile phone frame */
+    .mobile-frame {
+      background: #fff;
+      border-radius: 28px;
+      border: 3px solid rgba(16,35,63,0.2);
+      box-shadow: 0 24px 64px rgba(45,91,255,0.18), 0 4px 16px rgba(0,0,0,0.08);
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .mobile-frame::before {
+      content: '';
+      display: block;
+      width: 40px; height: 6px;
+      background: rgba(16,35,63,0.18);
+      border-radius: 999px;
+      margin: 12px auto 0;
+    }
+    .mobile-screen-inner {
+      margin: 10px 8px 8px;
+      background: #f4f8ff;
+      border-radius: 20px;
+      height: calc(100% - 34px);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 9px;
+      padding: 14px 10px;
+    }
+    .mobile-bar { height: 7px; border-radius: 999px; background: rgba(45,91,255,0.15); width: 82%; }
+    .mobile-bar.short { width: 55%; }
+    .mobile-bar.accent { background: rgba(45,91,255,0.28); height: 32px; border-radius: 12px; width: 87%; }
+    .mobile-bar.teal { background: rgba(0,212,196,0.32); height: 22px; border-radius: 10px; width: 87%; }
+    .mobile-bar.row { display: flex; gap: 6px; width: 87%; }
+    .mobile-bar.row .cell { flex: 1; height: 18px; border-radius: 8px; background: rgba(45,91,255,0.12); }
+    .mobile-bar.row .cell.accent { background: rgba(0,212,196,0.28); height: 18px; border-radius: 8px; }
+    .mobile-label {
+      font-size: .68rem; color: #5E7C99; text-align: center;
+      font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+      margin-bottom: .3rem;
+    }
+
+    /* Flow diagram (slide 5) */
+    .flow-box {
+      background: rgba(255,255,255,0.88);
+      border: 1.5px solid rgba(45,91,255,0.13);
+      border-radius: 18px;
+      padding: .85rem 1rem;
+      box-shadow: 0 8px 22px rgba(45,91,255,0.07);
+    }
+    .flow-arrow { display: flex; align-items: center; justify-content: center; color: #00D4C4; font-size: 1.6rem; font-weight: 900; line-height: 1; }
+    .flow-plus { display: flex; align-items: center; justify-content: center; color: #2D5BFF; font-size: 1.8rem; font-weight: 900; line-height: 1; }
+    .reward-box { background: linear-gradient(135deg, rgba(45,91,255,0.1) 0%, rgba(0,212,196,0.12) 100%); border: 2px solid rgba(45,91,255,0.2); border-radius: 20px; padding: .9rem 1.2rem; text-align: center; }
+
+    /* Resp card bullet styling */
+    .resp-card ul { list-style: none; padding: 0; margin: 0; }
+    .resp-card ul li { position: relative; padding-left: 1.4rem; }
+    .resp-card ul li::before { content: ''; position: absolute; left: 0; top: .46em; width: 7px; height: 7px; border-radius: 50%; background: linear-gradient(135deg, #2D5BFF, #00D4C4); }
+
+    /* Horizontal UI showcase (slide 9) */
+    .horiz-ui {
+      background: rgba(255,255,255,0.9);
+      border: 2px solid rgba(16,35,63,0.12);
+      border-radius: 18px;
+      box-shadow: 0 12px 40px rgba(45,91,255,0.12);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow: hidden;
+    }
+    .horiz-cell { flex: 1; background: #f0f5ff; border-radius: 10px; height: 36px; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 8px; }
+    .horiz-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .horiz-bar { height: 6px; border-radius: 999px; background: rgba(45,91,255,0.2); flex: 1; }
+    .horiz-bar.teal { background: rgba(0,212,196,0.35); }
+    .horiz-bar.accent { background: rgba(45,91,255,0.35); }
+    .horiz-sep { width: 1px; height: 28px; background: rgba(16,35,63,0.08); flex-shrink: 0; }
+  </style>
+</head>
+<body>
+<div class="mouse-spotlight" style="position:fixed;inset:0;z-index:99;pointer-events:none;"></div>
+<div class="deck">
+
+  <!-- SLIDE 1 -->
+  <div class="slide slide-1 active" data-slide="1">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:460px;height:460px;top:-120px;right:-80px;background:#2D5BFF;opacity:.14"></div>
+      <div class="blob" style="width:360px;height:360px;bottom:-120px;left:-60px;background:#00D4C4;opacity:.18"></div>
+      <div class="blob" style="width:240px;height:240px;top:30%;left:10%;background:#78E7E1;opacity:.18"></div>
+    </div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1"></canvas>
+    <div class="content text-center">
+      <div class="reveal inline-flex items-center justify-center w-16 h-16 rounded-[18px] bg-white/75 border border-white/70 shadow-xl mb-4">
+        <img src="https://images.prismic.io/buddytrading/aTZ7nHNYClf9n6I6_newlogoicon.png?auto=format,compress" style="width:44px;height:44px;object-fit:contain;" alt="BuddyTrading" />
+      </div>
+      <div class="reveal pill mx-auto mb-3">Client Proposal Deck</div>
+      <h1 class="reveal title-xl text-[clamp(2.9rem,6vw,5.4rem)] bg-linear-to-r from-accent-1 via-accent-2 to-accent-1 bg-clip-text text-transparent mb-3">Quest Campaigns for Token Projects</h1>
+      <p class="reveal text-[clamp(1rem,1.6vw,1.3rem)] text-text-secondary max-w-2xl mx-auto mb-7">Community growth, trading volume, and product activation — in one campaign.</p>
+      <div class="reveal footer-tag">Prepared by BuddyTrading · Confidential</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2 -->
+  <div class="slide slide-2" data-slide="2">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:320px;height:320px;top:-80px;right:-70px;background:#2D5BFF;opacity:.09"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;left:-40px;background:#00D4C4;opacity:.08"></div>
+    </div>
+    <div class="slide-logo"><img src="https://images.prismic.io/buddytrading/ZqhBJx5LeNNTxlMp_big-logo.png?auto=format,compress" alt="BuddyTrading" /></div>
+    <div class="content">
+      <div class="reveal pill mb-3">The Problem</div>
+      <h2 class="reveal section-title text-[clamp(1.8rem,3.4vw,2.8rem)] mb-5">What we hear from token projects</h2>
+      <div class="grid grid-cols-3 gap-6">
+        <div class="reveal">
+          <div class="chat-bubble">
+            <div class="chat-avatar">01</div>
+            <h3 class="font-bold text-[1rem] mb-1.5">Marketing spend isn't producing measurable signals</h3>
+            <p class="text-[.87rem] leading-[1.44] text-text-secondary">KOL pushes and PR placements create reach but rarely drive real engagement — before or after listing.</p>
+          </div>
+        </div>
+        <div class="reveal">
+          <div class="chat-bubble">
+            <div class="chat-avatar">02</div>
+            <h3 class="font-bold text-[1rem] mb-1.5">The native token has no daily reason to be touched</h3>
+            <p class="text-[.87rem] leading-[1.44] text-text-secondary">Tokens sit idle after listing. Trade frequency drops and the utility story weakens fast.</p>
+          </div>
+        </div>
+        <div class="reveal">
+          <div class="chat-bubble">
+            <div class="chat-avatar">03</div>
+            <h3 class="font-bold text-[1rem] mb-1.5">Community engagement and on-chain activity are disconnected</h3>
+            <p class="text-[.87rem] leading-[1.44] text-text-secondary">Active Discord and Telegram members are often not the traders or holders. That gap costs real momentum.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3 -->
+  <div class="slide slide-3" data-slide="3">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:320px;height:320px;top:8%;left:-80px;background:#00D4C4;opacity:.09"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-60px;right:-30px;background:#2D5BFF;opacity:.08"></div>
+    </div>
+    <div class="slide-logo"><img src="https://images.prismic.io/buddytrading/ZqhBJx5LeNNTxlMp_big-logo.png?auto=format,compress" alt="BuddyTrading" /></div>
+    <div class="content">
+      <div class="reveal pill mb-4">What BuddyTrading Delivers</div>
+      <h2 class="reveal section-title text-[clamp(2rem,3.8vw,3.1rem)] mb-5">Three deliverables, one platform</h2>
+      <div class="grid grid-cols-3 gap-5 mb-5">
+        <div class="reveal kpi-card"><div class="mini-label mb-2">Pillar 01</div><h3 class="font-bold text-[1.08rem] mb-2">Community activation</h3><p class="text-[.92rem] text-text-secondary leading-[1.45]">Real users complete quests inside your channels, tied to verified BuddyTrading accounts.</p></div>
+        <div class="reveal kpi-card"><div class="mini-label mb-2">Pillar 02</div><h3 class="font-bold text-[1.08rem] mb-2">Trading volume</h3><p class="text-[.92rem] text-text-secondary leading-[1.45]">Campaign-driven trades on your token pair across supported exchanges.</p></div>
+        <div class="reveal kpi-card"><div class="mini-label mb-2">Pillar 03</div><h3 class="font-bold text-[1.08rem] mb-2">Product engagement</h3><p class="text-[.92rem] text-text-secondary leading-[1.45]">Hands-on usage such as staking, wallet connect, feature use, or governance actions.</p></div>
+      </div>
+      <!-- Blue USP box -->
+      <div class="reveal usp-box">
+        <div class="usp-heading">The Platform provides users a seamless experience</div>
+        <div class="grid grid-cols-4 gap-3">
+          <div class="infra-block">Preset bot trading strategies for users with no trading background</div>
+          <div class="infra-block">Strategy creation kit with AI agents and a code editor</div>
+          <div class="infra-block">Backtest tools so users can validate before deploying</div>
+          <div class="infra-block">Quest tracking and verification tied to client and BuddyTrading accounts</div>
+        </div>
+      </div>
+      <div class="reveal mt-4 text-[1rem] font-semibold text-accent-1">You pay for participants and buyers, not for platform access.</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4 — User Journey -->
+  <div class="slide slide-4" data-slide="4">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:300px;height:300px;top:-70px;right:8%;background:#2D5BFF;opacity:.08"></div>
+      <div class="blob" style="width:240px;height:240px;bottom:-60px;left:5%;background:#00D4C4;opacity:.08"></div>
+    </div>
+    <div class="slide-logo"><img src="https://images.prismic.io/buddytrading/ZqhBJx5LeNNTxlMp_big-logo.png?auto=format,compress" alt="BuddyTrading" /></div>
+    <div class="content">
+      <div class="reveal pill mb-3">How the Campaign Works</div>
+      <h2 class="reveal section-title text-[clamp(1.8rem,3.2vw,2.8rem)] mb-4">The user journey</h2>
+      <div class="flex gap-6 items-start">
+        <!-- Step cards: ~43% -->
+        <div style="width:43%; display:flex; flex-direction:column; gap:10px;">
+          <div class="reveal sample-card" style="padding:.75rem .9rem;">
+            <div class="mini-label mb-1">Step 1</div>
+            <h3 class="font-bold text-[.95rem] mb-1">Join and link</h3>
+            <p class="text-[.83rem] text-text-secondary leading-[1.38]">Users join through BuddyTrading and link their exchange and community accounts.</p>
+          </div>
+          <div class="reveal sample-card" style="padding:.75rem .9rem;">
+            <div class="mini-label mb-1">Step 2</div>
+            <h3 class="font-bold text-[.95rem] mb-1">Pick a pack</h3>
+            <p class="text-[.83rem] text-text-secondary leading-[1.38]">Users choose the reward pack tier they want to compete for.</p>
+          </div>
+          <div class="reveal sample-card" style="padding:.75rem .9rem;">
+            <div class="mini-label mb-1">Step 3</div>
+            <h3 class="font-bold text-[.95rem] mb-1">Complete the quests</h3>
+            <p class="text-[.83rem] text-text-secondary leading-[1.38]">Client quests lead the path; BuddyTrading quests support it. Verification runs via exchange APIs and on-chain data.</p>
+          </div>
+          <div class="reveal sample-card" style="padding:.75rem .9rem;">
+            <div class="mini-label mb-1">Step 4</div>
+            <h3 class="font-bold text-[.95rem] mb-1">Claim the reward</h3>
+            <p class="text-[.83rem] text-text-secondary leading-[1.38]">Once all conditions verify, the pack pays out within the campaign window.</p>
+          </div>
+        </div>
+        <!-- Mobile UI: ~57% -->
+        <div class="reveal" style="width:57%; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:6px; padding-top:.2rem;">
+          <div class="mobile-label">Onboarding UI</div>
+          <img
+            src="https://strapi.buddytrading.com/uploads/Leaderboard_UI_c2af6dce66.png"
+            alt="Onboarding UI"
+            style="
+              max-height:64vh;
+              width:auto;
+              max-width:100%;
+              border-radius:20px;
+              box-shadow: 0 20px 56px rgba(45,91,255,0.18), 0 4px 16px rgba(0,0,0,0.07);
+              display:block;
+            "
+          />
+          <div style="font-size:.68rem; color:#8aa3bf; font-style:italic; margin-top:2px;">* Sample UI for illustration only</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5 -->
+  <div class="slide slide-5" data-slide="5">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:340px;height:340px;top:-90px;left:-70px;background:#78E7E1;opacity:.11"></div>
+      <div class="blob" style="width:250px;height:250px;bottom:-70px;right:-40px;background:#2D5BFF;opacity:.08"></div>
+    </div>
+    <div class="slide-logo"><img src="https://images.prismic.io/buddytrading/ZqhBJx5LeNNTxlMp_big-logo.png?auto=format,compress" alt="BuddyTrading" /></div>
+    <div class="content">
+      <div class="reveal pill mb-4">The Quest Pack Logic</div>
+      <h2 class="reveal section-title text-[clamp(2rem,3.8vw,3.1rem)] mb-5">How a pack is structured</h2>
+      <div class="flex flex-col items-center gap-0">
+        <!-- Row 1: Client quests + BuddyTrading quests -->
+        <div class="reveal w-full flex items-stretch gap-3 justify-center">
+          <div class="flow-box flex-1 max-w-xs">
+            <div class="mini-label mb-2">Main requirement</div>
+            <h3 class="font-bold text-[1.08rem] mb-1">Client Quests</h3>
+            <p class="text-[.86rem] text-text-secondary leading-[1.4]">Token-pair trades, native token holding, and product use. The pack only unlocks when this bundle is complete.</p>
+          </div>
+          <div class="flow-plus self-center px-2">+</div>
+          <div class="flow-box flex-1 max-w-xs">
+            <div class="mini-label mb-2" style="color:#00998F;">Side support</div>
+            <h3 class="font-bold text-[1.08rem] mb-1">BuddyTrading Quests</h3>
+            <p class="text-[.86rem] text-text-secondary leading-[1.4]">Supporting actions: try a strategy, share a backtest, or complete onboarding — these boost engagement alongside the main path.</p>
+          </div>
+        </div>
+        <div class="flow-arrow py-1">↓</div>
+        <!-- Row 2: Universal requirements -->
+        <div class="reveal w-full max-w-2xl">
+          <div class="flow-box" style="border-color:rgba(0,212,196,0.3);background:rgba(0,212,196,0.07);">
+            <div class="mini-label mb-1" style="color:#00998F;">Universal requirements</div>
+            <p class="text-[.9rem] text-text-secondary leading-[1.45] text-center">Every pack requires a <strong>daily check-in</strong> inside the client community <strong>+</strong> a <strong>linked BuddyTrading account</strong> — filters drive-by participants and keeps the channel active throughout.</p>
+          </div>
+        </div>
+        <div class="flow-arrow py-1">↓</div>
+        <!-- Row 3: Reward pack -->
+        <div class="reveal w-full max-w-sm">
+          <div class="reward-box">
+            <div class="title-xl text-[1.8rem] text-accent-1 mb-1">🎁 Reward Pack</div>
+            <div class="text-[.88rem] text-text-secondary">Higher-value packs add more demanding client quests. Side quests scale lightly.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6 — Quest KPI -->
+  <div class="slide slide-6" data-slide="6">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:310px;height:310px;top:-90px;right:-80px;background:#00D4C4;opacity:.09"></div>
+      <div class="blob" style="width:240px;height:240px;bottom:-60px;left:-40px;background:#2D5BFF;opacity:.08"></div>
+    </div>
+    <div class="slide-logo"><img src="https://images.prismic.io/buddytrading/ZqhBJx5LeNNTxlMp_big-logo.png?auto=format,compress" alt="BuddyTrading" /></div>
+    <div class="content">
+      <div class="reveal pill mb-3">Quest Menu</div>
+      <h2 class="reveal section-title text-[clamp(1.8rem,3.2vw,2.8rem)] mb-4">Quests grouped by KPI</h2>
+      <div class="flex gap-6 items-start">
+        <!-- KPI cards: ~43% -->
+        <div style="width:43%; display:flex; flex-direction:column; gap:10px;">
+          <div class="reveal menu-card" style="padding:.7rem .9rem;">
+            <div class="mini-label mb-1">Trading Volume</div>
+            <p class="text-[.84rem] leading-[1.42] text-text-secondary"><strong>Token project:</strong> achieve a target USD volume, sustain a long-bias position, hold through a daily close.<br><strong>BuddyTrading:</strong> deploy a preset strategy, publish a verified backtest.</p>
+          </div>
+          <div class="reveal menu-card" style="padding:.7rem .9rem;">
+            <div class="mini-label mb-1">Token Holder Growth</div>
+            <p class="text-[.84rem] leading-[1.42] text-text-secondary"><strong>Token project:</strong> hold a defined token balance for a set period, stake, or lock in a vault.<br><strong>BuddyTrading:</strong> maintain a funded account, keep an active strategy running.</p>
+          </div>
+          <div class="reveal menu-card" style="padding:.7rem .9rem;">
+            <div class="mini-label mb-1">Product Engagement</div>
+            <p class="text-[.84rem] leading-[1.42] text-text-secondary"><strong>Token project:</strong> connect wallet, complete product onboarding, activate a core feature.<br><strong>BuddyTrading:</strong> link account, complete platform onboarding, execute first strategy.</p>
+          </div>
+          <div class="reveal menu-card" style="padding:.7rem .9rem;">
+            <div class="mini-label mb-1">Community Growth</div>
+            <p class="text-[.84rem] leading-[1.42] text-text-secondary"><strong>Token project:</strong> daily community check-in, refer a verified participant, publish campaign content.<br><strong>BuddyTrading:</strong> complete platform social tasks, refer a verified user.</p>
+          </div>
+        </div>
+        <!-- Quest UI: ~57% -->
+        <div class="reveal" style="width:57%; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:6px; padding-top:.2rem;">
+          <div class="mobile-label">Quest Leaderboard UI</div>
+          <img
+            src="https://strapi.buddytrading.com/uploads/Quest_design_9a310c36ff.png"
+            alt="Quest Leaderboard UI"
+            style="
+              max-height:64vh;
+              width:auto;
+              max-width:100%;
+              border-radius:20px;
+              box-shadow: 0 20px 56px rgba(45,91,255,0.18), 0 4px 16px rgba(0,0,0,0.07);
+              display:block;
+            "
+          />
+          <div style="font-size:.68rem; color:#8aa3bf; font-style:italic; margin-top:2px;">* Sample UI for illustration only</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7 -->
+  <div class="slide slide-7" data-slide="7">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:300px;height:300px;top:-75px;left:-60px;background:#2D5BFF;opacity:.08"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-65px;right:-50px;background:#00D4C4;opacity:.09"></div>
+    </div>
+    <div class="slide-logo"><img src="https://images.prismic.io/buddytrading/ZqhBJx5LeNNTxlMp_big-logo.png?auto=format,compress" alt="BuddyTrading" /></div>
+    <div class="content">
+      <div class="reveal pill mb-3">Responsibilities</div>
+      <h2 class="reveal section-title text-[clamp(1.8rem,3.2vw,2.8rem)] mb-4">What each side brings</h2>
+      <div class="flex gap-5 items-stretch">
+
+        <!-- Left: responsibility cards ~43% -->
+        <div style="width:43%; display:flex; flex-direction:column; gap:10px;">
+          <div class="reveal resp-card" style="padding:.85rem 1rem;">
+            <div class="mini-label mb-2">Client provides</div>
+            <ul class="space-y-1.5 text-[.87rem] text-text-secondary leading-[1.4]">
+              <li>Reward budget, with stablecoin preferred.</li>
+              <li>Native token utility documentation for quest design.</li>
+              <li>Marketing reach through KOL, community, and content channels.</li>
+              <li>Catalyst calendar: releases, listings, announcements, unlocks.</li>
+              <li>Token contract addresses, supported pairs, and compliance constraints.</li>
+            </ul>
+          </div>
+          <div class="reveal resp-card" style="padding:.85rem 1rem;">
+            <div class="mini-label mb-2">BuddyTrading provides</div>
+            <ul class="space-y-1.5 text-[.87rem] text-text-secondary leading-[1.4]">
+              <li>Quest design tailored to KPI and budget.</li>
+              <li>Campaign platform and user verification.</li>
+              <li>Trading infrastructure: presets, creation kit, backtest, and AI agents.</li>
+              <li>Daily operations: slot allocation, pacing, anti-bot screening, support.</li>
+              <li>Reporting during and after the campaign.</li>
+            </ul>
+          </div>
+          <div class="reveal small-note">Commercial note: native token budgets are acceptable with a 30% uplift on budget and a confirmed release schedule.</div>
+        </div>
+
+        <!-- Right: success metrics dashboard ~57% -->
+        <div class="reveal" style="width:57%;">
+          <div style="background:rgba(255,255,255,0.92); border:1.5px solid rgba(45,91,255,0.12); border-radius:22px; box-shadow:0 20px 56px rgba(45,91,255,0.13); padding:1.1rem 1.2rem; height:100%; display:flex; flex-direction:column; gap:12px;">
+            <!-- Dashboard header -->
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <div>
+                <div class="mini-label" style="margin-bottom:.2rem;">If we collaborate</div>
+                <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1rem; color:#10233F; letter-spacing:-.02em;">Campaign Success Dashboard</div>
+              </div>
+              <div style="display:flex; gap:5px; align-items:center;">
+                <div style="width:8px;height:8px;border-radius:50%;background:#00D4C4;"></div>
+                <div style="font-size:.72rem; color:#00998F; font-weight:700;">Live</div>
+              </div>
+            </div>
+            <!-- KPI metric chips 2×2 -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+              <div style="background:linear-gradient(135deg,#eef2ff,#e8faff); border:1px solid rgba(45,91,255,0.12); border-radius:14px; padding:.65rem .85rem;">
+                <div style="font-size:.68rem; font-weight:700; color:#2D5BFF; text-transform:uppercase; letter-spacing:.07em; margin-bottom:.25rem;">Pack Winners</div>
+                <div style="font-family:'Space Grotesk',sans-serif; font-size:1.5rem; font-weight:700; color:#10233F; line-height:1;">2,400+</div>
+                <div style="font-size:.72rem; color:#5E7C99; margin-top:.2rem;">verified participants</div>
+              </div>
+              <div style="background:linear-gradient(135deg,#e8fff9,#eef2ff); border:1px solid rgba(0,212,196,0.18); border-radius:14px; padding:.65rem .85rem;">
+                <div style="font-size:.68rem; font-weight:700; color:#00998F; text-transform:uppercase; letter-spacing:.07em; margin-bottom:.25rem;">Community Reached</div>
+                <div style="font-family:'Space Grotesk',sans-serif; font-size:1.5rem; font-weight:700; color:#10233F; line-height:1;">10,000+</div>
+                <div style="font-size:.72rem; color:#5E7C99; margin-top:.2rem;">unique members touched</div>
+              </div>
+              <div style="background:linear-gradient(135deg,#eef2ff,#e8faff); border:1px solid rgba(45,91,255,0.12); border-radius:14px; padding:.65rem .85rem;">
+                <div style="font-size:.68rem; font-weight:700; color:#2D5BFF; text-transform:uppercase; letter-spacing:.07em; margin-bottom:.25rem;">Volume Generated</div>
+                <div style="font-family:'Space Grotesk',sans-serif; font-size:1.5rem; font-weight:700; color:#10233F; line-height:1;">$340K+</div>
+                <div style="font-size:.72rem; color:#5E7C99; margin-top:.2rem;">on your token pair</div>
+              </div>
+              <div style="background:linear-gradient(135deg,#e8fff9,#eef2ff); border:1px solid rgba(0,212,196,0.18); border-radius:14px; padding:.65rem .85rem;">
+                <div style="font-size:.68rem; font-weight:700; color:#00998F; text-transform:uppercase; letter-spacing:.07em; margin-bottom:.25rem;">Quest Completion</div>
+                <div style="font-family:'Space Grotesk',sans-serif; font-size:1.5rem; font-weight:700; color:#10233F; line-height:1;">87%</div>
+                <div style="font-size:.72rem; color:#5E7C99; margin-top:.2rem;">avg across all tiers</div>
+              </div>
+            </div>
+            <!-- Mini bar chart -->
+            <div style="background:#f4f8ff; border-radius:14px; padding:.7rem .9rem;">
+              <div style="font-size:.7rem; font-weight:700; color:#5E7C99; text-transform:uppercase; letter-spacing:.07em; margin-bottom:.6rem;">Campaign activity by phase</div>
+              <div style="display:flex; align-items:flex-end; gap:6px; height:42px;">
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+                  <div style="width:100%; background:rgba(45,91,255,0.22); border-radius:4px 4px 0 0; height:40%;"></div>
+                  <div style="font-size:.62rem; color:#8aa3bf;">W1</div>
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+                  <div style="width:100%; background:rgba(45,91,255,0.35); border-radius:4px 4px 0 0; height:60%;"></div>
+                  <div style="font-size:.62rem; color:#8aa3bf;">W2</div>
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+                  <div style="width:100%; background:rgba(0,212,196,0.5); border-radius:4px 4px 0 0; height:82%;"></div>
+                  <div style="font-size:.62rem; color:#8aa3bf;">W3</div>
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+                  <div style="width:100%; background:linear-gradient(180deg,#2D5BFF,#00D4C4); border-radius:4px 4px 0 0; height:100%;"></div>
+                  <div style="font-size:.62rem; color:#8aa3bf;">W4</div>
+                </div>
+              </div>
+            </div>
+            <!-- Progress bars -->
+            <div style="display:flex; flex-direction:column; gap:7px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div style="font-size:.75rem; color:#355070; width:110px; flex-shrink:0;">Trading volume</div>
+                <div style="flex:1; height:7px; background:rgba(45,91,255,0.1); border-radius:999px; overflow:hidden;">
+                  <div style="width:82%; height:100%; background:linear-gradient(90deg,#2D5BFF,#4d7aff); border-radius:999px;"></div>
+                </div>
+                <div style="font-size:.75rem; font-weight:700; color:#2D5BFF; width:32px; text-align:right;">82%</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div style="font-size:.75rem; color:#355070; width:110px; flex-shrink:0;">Holder growth</div>
+                <div style="flex:1; height:7px; background:rgba(0,212,196,0.1); border-radius:999px; overflow:hidden;">
+                  <div style="width:74%; height:100%; background:linear-gradient(90deg,#00D4C4,#00e6d8); border-radius:999px;"></div>
+                </div>
+                <div style="font-size:.75rem; font-weight:700; color:#00998F; width:32px; text-align:right;">74%</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div style="font-size:.75rem; color:#355070; width:110px; flex-shrink:0;">Product engagement</div>
+                <div style="flex:1; height:7px; background:rgba(45,91,255,0.1); border-radius:999px; overflow:hidden;">
+                  <div style="width:91%; height:100%; background:linear-gradient(90deg,#2D5BFF,#00D4C4); border-radius:999px;"></div>
+                </div>
+                <div style="font-size:.75rem; font-weight:700; color:#2D5BFF; width:32px; text-align:right;">91%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8 -->
+  <div class="slide slide-8" data-slide="8">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:320px;height:320px;top:-90px;right:-70px;background:#2D5BFF;opacity:.08"></div>
+      <div class="blob" style="width:250px;height:250px;bottom:-70px;left:-50px;background:#00D4C4;opacity:.08"></div>
+    </div>
+    <div class="slide-logo"><img src="https://images.prismic.io/buddytrading/ZqhBJx5LeNNTxlMp_big-logo.png?auto=format,compress" alt="BuddyTrading" /></div>
+    <div class="content">
+      <div class="reveal pill mb-4">Sample Campaigns</div>
+      <h2 class="reveal section-title text-[clamp(2rem,3.8vw,3.1rem)] mb-5">Reference scenarios at three budgets</h2>
+      <div class="reveal glass-card p-4">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th style="color:#2D5BFF;">5,000 USDT</th>
+              <th style="color:#2D5BFF;">10,000 USDT</th>
+              <th style="color:#2D5BFF;">15,000 USDT</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-semibold">Estimated pack winners</td>
+              <td>~900</td>
+              <td>~1,800</td>
+              <td>~2,700</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">Estimated community reach</td>
+              <td>3,000 to 5,000</td>
+              <td>6,000 to 10,000</td>
+              <td>9,000 to 15,000</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">Suggested campaign window</td>
+              <td>14 to 21 days</td>
+              <td>21 to 28 days</td>
+              <td>28 to 35 days</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">Pack tier range</td>
+              <td>1 to 100 USDT</td>
+              <td>1 to 500 USDT</td>
+              <td>1 to 500 USDT</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="reveal mt-4 small-note"><em>Reference scenarios only. Final winner count, duration, and pack tier mix depend on the client's target KPI and budget commitments.</em></div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9 — 28-day arc -->
+  <div class="slide slide-9" data-slide="9">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:330px;height:330px;top:-100px;left:-70px;background:#78E7E1;opacity:.12"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-70px;right:-40px;background:#2D5BFF;opacity:.08"></div>
+    </div>
+    <div class="slide-logo"><img src="https://images.prismic.io/buddytrading/ZqhBJx5LeNNTxlMp_big-logo.png?auto=format,compress" alt="BuddyTrading" /></div>
+    <canvas class="particle-canvas-ambient" style="position:absolute;inset:0;z-index:1"></canvas>
+    <div class="content">
+      <div class="reveal pill mb-3">Campaign Timeline</div>
+      <h2 class="reveal section-title text-[clamp(1.8rem,3.2vw,2.8rem)] mb-6">A 28-day arc, flexible to your calendar</h2>
+      <div class="relative mb-4">
+        <div class="timeline-line"></div>
+        <div class="grid grid-cols-4 gap-4 text-center">
+          <div class="reveal timeline-node sample-card">
+            <div class="mini-label">Phase 1 · Days 1–7</div>
+            <h3 class="font-bold mt-2 mb-1.5">Awareness</h3>
+            <p class="text-[.85rem] text-text-secondary leading-[1.38]">Small packs unlock. Goal: registration, account linking, and check-in habits.</p>
+          </div>
+          <div class="reveal timeline-node sample-card">
+            <div class="mini-label">Phase 2 · Days 7–14</div>
+            <h3 class="font-bold mt-2 mb-1.5">Engagement</h3>
+            <p class="text-[.85rem] text-text-secondary leading-[1.38]">Mid-tier packs open. Product quests gain weight; trading quests start ramping.</p>
+          </div>
+          <div class="reveal timeline-node sample-card">
+            <div class="mini-label">Phase 3 · Days 14–21</div>
+            <h3 class="font-bold mt-2 mb-1.5">Volume peak</h3>
+            <p class="text-[.85rem] text-text-secondary leading-[1.38]">Larger packs release. Hold and long-bias quests carry most of the budget.</p>
+          </div>
+          <div class="reveal timeline-node sample-card">
+            <div class="mini-label">Phase 4 · Days 21–28</div>
+            <h3 class="font-bold mt-2 mb-1.5">Climax</h3>
+            <p class="text-[.85rem] text-text-secondary leading-[1.38]">Top packs unlock. Large-volume and hold-through-event quests close the campaign.</p>
+          </div>
+        </div>
+      </div>
+      <!-- Horizontal UI showcase -->
+      <div class="reveal" style="margin-top:.5rem;">
+        <div class="mobile-label mb-2" style="text-align:center;">Campaign Dashboard UI</div>
+        <img
+          src="https://strapi.buddytrading.com/uploads/Campaign_header_e1d869299b.png"
+          alt="Campaign Dashboard UI"
+          style="
+            max-height:26vh;
+            width:auto;
+            max-width:100%;
+            border-radius:14px;
+            box-shadow: 0 10px 32px rgba(45,91,255,0.14), 0 2px 8px rgba(0,0,0,0.06);
+            display:block;
+            margin:0 auto;
+          "
+        />
+        <div style="font-size:.68rem; color:#8aa3bf; font-style:italic; text-align:center; margin-top:5px;">* Sample UI for illustration only</div>
+      </div>
+      <div class="reveal mt-3 text-[.87rem] text-text-secondary text-center">Campaign length contracts or extends with pack tier mix. The 28-day default fits the 10k reference scenario.</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 10 -->
+  <div class="slide slide-10" data-slide="10">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:330px;height:330px;top:-80px;right:-60px;background:#2D5BFF;opacity:.09"></div>
+      <div class="blob" style="width:240px;height:240px;bottom:-50px;left:-30px;background:#00D4C4;opacity:.09"></div>
+    </div>
+    <div class="slide-logo"><img src="https://images.prismic.io/buddytrading/ZqhBJx5LeNNTxlMp_big-logo.png?auto=format,compress" alt="BuddyTrading" /></div>
+    <div class="content">
+      <div class="reveal pill mb-4">Our Approach</div>
+      <h2 class="reveal section-title text-[clamp(2rem,3.8vw,3.1rem)] mb-5">How we design these campaigns</h2>
+      <div class="grid grid-cols-2 gap-5">
+        <div class="reveal principle-card"><div class="mini-label mb-2">Principle 01</div><h3 class="font-bold mb-2">Rewards are earned, not handed out</h3><p class="text-[.92rem] text-text-secondary leading-[1.45]">Quest bundles require real product use, trading activity, or holding behavior, so budget is tied to the work being paid for.</p></div>
+        <div class="reveal principle-card"><div class="mini-label mb-2">Principle 02</div><h3 class="font-bold mb-2">Long-bias by design</h3><p class="text-[.92rem] text-text-secondary leading-[1.45]">Hold and accumulation quests carry more weight than rapid-cycle trades, so incentives support staying in position rather than churning.</p></div>
+        <div class="reveal principle-card"><div class="mini-label mb-2">Principle 03</div><h3 class="font-bold mb-2">Fair allocation</h3><p class="text-[.92rem] text-text-secondary leading-[1.45]">Slot allocation is pipeline-based with per-pack caps and time windows, with no insider preference or off-platform side deals.</p></div>
+        <div class="reveal principle-card"><div class="mini-label mb-2">Principle 04</div><h3 class="font-bold mb-2">No wash trading. No coordinated accounts</h3><p class="text-[.92rem] text-text-secondary leading-[1.45]">The goal is real participant trading and real market candles, with anti-bot screening built into daily operations.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 11 -->
+  <div class="slide slide-11" data-slide="11">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:450px;height:450px;top:-120px;right:-120px;background:#2D5BFF;opacity:.14"></div>
+      <div class="blob" style="width:320px;height:320px;bottom:-100px;left:-70px;background:#00D4C4;opacity:.15"></div>
+      <div class="blob" style="width:240px;height:240px;top:30%;left:15%;background:#78E7E1;opacity:.16"></div>
+    </div>
+    <div class="slide-logo"><img src="https://images.prismic.io/buddytrading/ZqhBJx5LeNNTxlMp_big-logo.png?auto=format,compress" alt="BuddyTrading" /></div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1"></canvas>
+    <div class="content text-center">
+      <div class="reveal pill mx-auto mb-4">Next Steps</div>
+      <h2 class="reveal title-xl text-[clamp(2.6rem,5vw,4.3rem)] text-accent-1 mb-6">Four questions to scope your campaign</h2>
+      <div class="grid grid-cols-2 gap-5 text-left max-w-5xl mx-auto">
+        <div class="reveal question-card"><div class="mini-label mb-2">Question 01</div><p class="text-[.96rem] text-text-secondary leading-[1.45]"><strong>What catalysts are landing during the campaign window?</strong> Listings, releases, partnership announcements, and token unlocks set the timeline tempo.</p></div>
+        <div class="reveal question-card"><div class="mini-label mb-2">Question 02</div><p class="text-[.96rem] text-text-secondary leading-[1.45]"><strong>What is the utility of your native token, and what behaviors should quests reinforce?</strong> Holding, trading, staking, product use, or governance.</p></div>
+        <div class="reveal question-card"><div class="mini-label mb-2">Question 03</div><p class="text-[.96rem] text-text-secondary leading-[1.45]"><strong>What budget range should we design around?</strong> Stablecoin or native token, and if native, what is the release schedule?</p></div>
+        <div class="reveal question-card"><div class="mini-label mb-2">Question 04</div><p class="text-[.96rem] text-text-secondary leading-[1.45]"><strong>What is the primary KPI for this campaign?</strong> Volume, holders, product engagement, community size, or a weighted mix.</p></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="nav-controls" aria-label="Slide controls">
+  <button class="nav-btn" onclick="changeSlide(-1)" aria-label="Previous slide">&#8249;</button>
+  <div class="slide-dots" id="dots"></div>
+  <button class="nav-btn" onclick="changeSlide(1)" aria-label="Next slide">&#8250;</button>
+  <span class="slide-counter" id="counter">1 / 11</span>
+</div>
+
+<script>
+  let current = 1;
+  const total = document.querySelectorAll('.slide').length;
+  const dotsContainer = document.getElementById('dots');
+  const counter = document.getElementById('counter');
+  for (let i = 1; i <= total; i++) { const dot = document.createElement('div'); dot.className = 'dot' + (i === 1 ? ' active' : ''); dot.onclick = () => goToSlide(i); dotsContainer.appendChild(dot); }
+  function goToSlide(n) {
+    const prev = document.querySelector('.slide.active');
+    const next = document.querySelector(`.slide[data-slide="${n}"]`);
+    if (prev) prev.classList.remove('active');
+    if (next) { next.classList.add('active'); animateSlide(next); }
+    current = n; updateNav();
+  }
+  function changeSlide(dir) { let next = current + dir; if (next < 1) next = total; if (next > total) next = 1; goToSlide(next); }
+  function updateNav() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i + 1 === current)); counter.textContent = current + ' / ' + total; }
+  document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); changeSlide(1); } if (e.key === 'ArrowLeft') { e.preventDefault(); changeSlide(-1); } });
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => { const diff = touchStartX - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) changeSlide(diff > 0 ? 1 : -1); });
+  function animateSlide(slide) {
+    slide.querySelectorAll('.reveal').forEach((el, i) => {
+      el.style.transition = 'none';
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.offsetHeight;
+      const delay = i * 0.07;
+      el.style.transition = `opacity 0.38s ease ${delay}s, transform 0.38s ease ${delay}s`;
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    });
+  }
+  document.addEventListener('mousemove', (e) => {
+    const spotlight = document.querySelector('.mouse-spotlight');
+    if (spotlight) spotlight.style.background = `radial-gradient(520px circle at ${e.clientX}px ${e.clientY}px, rgba(45,91,255,0.06), transparent 42%)`;
+  });
+  window.initParticles = function(canvas, options) {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
+    resize(); window.addEventListener('resize', resize);
+    const interactive = options.interactive !== false;
+    const count = options.count || (interactive ? 45 : 18);
+    let mx = -1000, my = -1000;
+    const particles = Array.from({ length: count }, () => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx:(Math.random()-.5)*.25, vy:(Math.random()-.5)*.25, size:Math.random()*2.2+.7, alpha:Math.random()*.28+.08 }));
+    if (interactive) {
+      canvas.addEventListener('mousemove', (e) => { const r = canvas.getBoundingClientRect(); mx = e.clientX - r.left; my = e.clientY - r.top; });
+      canvas.addEventListener('mouseleave', () => { mx = -1000; my = -1000; });
+    }
+    (function anim(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      particles.forEach(p => {
+        if (interactive) {
+          const dx = p.x - mx, dy = p.y - my; const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+          if (dist < 120) { const force = (120 - dist)/120; p.vx += (dx/dist)*force*0.08; p.vy += (dy/dist)*force*0.08; }
+        }
+        p.vx *= .985; p.vy *= .985; p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0;
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fillStyle = `rgba(45,91,255,${p.alpha})`; ctx.fill();
+      });
+      requestAnimationFrame(anim);
+    })();
+  };
+  document.querySelectorAll('.particle-canvas').forEach(c => window.initParticles(c, { interactive:true, count:45 }));
+  document.querySelectorAll('.particle-canvas-ambient').forEach(c => window.initParticles(c, { interactive:false, count:18 }));
+  try { animateSlide(document.querySelector('.slide.active')); } catch(e) {}
+</script>
+</body>
+</html>
